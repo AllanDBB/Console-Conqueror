@@ -1,4 +1,4 @@
-package org.abno.server;
+package org.abno.socket;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +29,7 @@ public class Server {
                 clients.add(clientHandler);
                 new Thread(clientHandler).start();
             }
+
         } catch (IOException e) {
             System.err.println("Error with server socket: " + e.getMessage());
         }
@@ -46,6 +47,8 @@ class ClientHandler implements Runnable {
         this.socket = socket;
         this.clients = clients;
     }
+
+    // $
 
     @Override
     public void run() {
@@ -67,12 +70,34 @@ class ClientHandler implements Runnable {
                     out.println("You have left the game.");
                     break;
                 }
-                broadcast(username + ": " + message);
+                processMessage(message);
             }
         } catch (IOException e) {
             System.err.println("Error handling client: " + e.getMessage());
         } finally {
             disconnect();
+        }
+    }
+
+    private void processMessage(String message){
+
+        if (message.startsWith("@")){
+            interpretCommands(message);
+        } else {
+            System.out.println(message);
+            broadcast(username + ": " + message);
+        }
+
+    }
+
+    private void interpretCommands(String command){
+
+        switch (command){
+            case "@Ready":
+                readyHandler();
+
+            default:
+                System.err.println("Unknown command: " + command);
         }
     }
 
@@ -95,4 +120,19 @@ class ClientHandler implements Runnable {
             }
         }
     }
+
+    private void broadcastAll(String message){
+        synchronized (clients) {
+            for (ClientHandler client : clients){
+                client.out.println(message);
+            }
+        }
+    }
+
+    // Here put the handlers for commands:
+    private void readyHandler() {
+        System.out.println("Ready");
+    }
+
+
 }
