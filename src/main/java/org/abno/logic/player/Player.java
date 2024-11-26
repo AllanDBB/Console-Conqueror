@@ -1,13 +1,11 @@
 package org.abno.logic.player;
 
 import org.abno.logic.cards.Card;
+import org.abno.logic.cards.Weapon;
 
 public class Player {
     private String name;
-    private Card firstCard;
-    private Card secondCard;
-    private Card thirdCard;
-    private Card fourthCard;
+    private Card[] cards;
 
     /*
     int wins;
@@ -18,50 +16,42 @@ public class Player {
     int gaveup;  no se si esto es necesario*/
 
 
-    Player (String name, Card firstCard, Card secondCard, Card thirdCard, Card fourthCard){
+    Player (String name, Card[] cards){
         this.name = name;
-        this.firstCard = firstCard;
-        this.secondCard = secondCard;
-        this.thirdCard = thirdCard;
-        this.fourthCard = fourthCard;
-
+        this.cards = cards;
     }
 
-    public void attack(Player enemy, Card warrior, int weapon){
-        if (warrior.isUsed(weapon)){
+    public void attack(Player enemy, Card warrior, String weapon){
+        if (warrior.getSpecificWeapon(weapon).isUsed()){
             return;
         }
 
-        int damage = warrior.getWeapon(weapon)[warrior.getType().ordinal()];
-        enemy.getCard(1).setLife(enemy.getCard(1).getLife() - damage);
-        enemy.getCard(2).setLife(enemy.getCard(2).getLife() - damage);
-        enemy.getCard(3).setLife(enemy.getCard(3).getLife() - damage);
-        enemy.getCard(4).setLife(enemy.getCard(4).getLife() - damage);
+        int damage = warrior.getSpecificWeapon(weapon).getArray()[warrior.getType().ordinal()];
 
-        if (enemy.getCard(1).getLife() < 0){enemy.getCard(1).setLife(0);}
-        if (enemy.getCard(2).getLife() < 0){enemy.getCard(2).setLife(0);}
-        if (enemy.getCard(3).getLife() < 0){enemy.getCard(3).setLife(0);}
-        if (enemy.getCard(4).getLife() < 0){enemy.getCard(4).setLife(0);}
+        for (Card c: enemy.getCards()){
+            c.setLife(c.getLife() - damage);
+            if (c.getLife() < 0){
+                c.setLife(0);
+            }
+        }
 
-        warrior.setUsed(weapon, true);
+        warrior.getSpecificWeapon(weapon).setUsed(true);
     }
 
-    public Card getCard(int card){
-        switch (card){
-            case 1:
-                return firstCard;
+    public String getName() {
+        return name;
+    }
 
-            case 2:
-                return secondCard;
+    public Card[] getCards() {
+        return cards;
+    }
 
-            case 3:
-                return thirdCard;
-
-            case 4:
-                return fourthCard;
+    public Card getSpecificCard(String name){
+        for (Card c: this.cards){
+            if (c.getName() == name){
+                return c;
+            }
         }
         return null;
     }
-
-
 }
