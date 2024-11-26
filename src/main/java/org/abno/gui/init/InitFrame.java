@@ -1,5 +1,7 @@
 package org.abno.gui.init;
 
+import org.abno.gui.lobby.LobbyFrame;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class InitFrame extends JFrame {
+
+    LobbyFrame lobbyFrame = new LobbyFrame();
 
     public InitFrame() {
         setTitle("Console Conqueror - Lobby");
@@ -53,8 +57,9 @@ public class InitFrame extends JFrame {
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                lobbyFrame.init();
                 System.out.println("¡El juego ha comenzado!");
+                dispose();
             }
         });
 

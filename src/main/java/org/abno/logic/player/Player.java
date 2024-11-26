@@ -2,8 +2,16 @@ package org.abno.logic.player;
 
 import org.abno.logic.cards.Card;
 
+import java.net.Socket;
+
 public class Player {
-    private String name;
+
+    // Socket information:
+    private Socket socket;
+    private String username;
+    private String userId;
+
+
     private Card firstCard;
     private Card secondCard;
     private Card thirdCard;
@@ -18,13 +26,22 @@ public class Player {
     int gaveup;  no se si esto es necesario*/
 
 
-    Player (String name, Card firstCard, Card secondCard, Card thirdCard, Card fourthCard){
-        this.name = name;
-        this.firstCard = firstCard;
-        this.secondCard = secondCard;
-        this.thirdCard = thirdCard;
-        this.fourthCard = fourthCard;
+    public Player(Socket socket, String username, String userId){
+        this.socket = socket;
+        this.username = username;
+        this.userId = userId;
+    }
 
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public void attack(Player enemy, Card warrior, int weapon){

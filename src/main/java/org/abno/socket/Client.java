@@ -1,77 +1,47 @@
 package org.abno.socket;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
-
-import org.abno.gui.init.InitFrame;
+import java.util.Scanner;
 
 public class Client {
-
     private static final String SERVER_ADDRESS = "localhost";
     private static final int SERVER_PORT = 8060;
 
-    private static BufferedReader reader;
-    private static PrintWriter writer;
-
-    private static InitFrame initFrame;
-
-    public static BufferedReader getReader() { return reader; }
-    public static PrintWriter getWriter() { return writer; }
-
     public static void main(String[] args) {
         try (Socket socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader console = new BufferedReader(new InputStreamReader(System.in))) {
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+             Scanner scanner = new Scanner(System.in)) {
 
-            writer = out;
-            reader = in;
-
-            initFrame = new InitFrame();
-            initFrame.init();
-
-            Thread listener = new Thread(() -> {
+            Thread readerThread = new Thread(() -> {
                 try {
-                    String response;
-                    while ((response = in.readLine()) != null) {
-
-
-                        if (response.startsWith("$")){
-                            //serverCommand(response);
-                        }
-
-                        System.out.println(response);
+                    String serverMessage;
+                    while ((serverMessage = in.readLine()) != null) {
+                        System.out.println(serverMessage);
                     }
                 } catch (IOException e) {
-                    System.err.println("Connection closed.");
+                    System.err.println("Error reading from server: " + e.getMessage());
                 }
             });
 
-            listener.start();
+            readerThread.start();
 
-            String input;
-            while ((input = console.readLine()) != null) {
-                if ("exit".equalsIgnoreCase(input)) {
-                    System.out.println("Disconnected from server.");
-                    break;
+            while (true) {
+                String userInput = scanner.nextLine();
+                if (!userInput.isEmpty()) {
+                    if (userInput.startsWith("/")) {
+                        // Enviar un comando al servidor
+                        out.println(userInput);
+                    } else {
+                        // Enviar un mensaje de chat al servidor
+                        out.println(userInput);
+                    }
+                    out.flush();
                 }
-                out.println(input);
             }
-
-            socket.close();
         } catch (IOException e) {
-            System.err.println("Can't connect " + e.getMessage());
+            System.err.println("Connection failed: " + e.getMessage());
         }
     }
-
-    private void serverCommand(String response) {
-        switch (response) {
-            case "exit":
-                System.exit(0);
-        }
-    }
-
 }
