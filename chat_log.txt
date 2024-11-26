@@ -21,3 +21,14 @@
 [26:17:35] CARD-FIRE-FUEGO-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5
 [26:17:35] CARD-FIRE-FUEGO-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5
 [26:17:35] CARD-FIRE-FUEGO-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5
+[26:17:38] NATI
+[26:17:38] create
+[26:17:38] ALLAN
+[26:17:38] ROOM-1732664317370
+[26:17:38] ALLAN has joined the game room.
+[26:17:39] /start
+[26:17:39] Es tu turno para configurar tus cartas.
+[26:17:39] Configura tu carta 1:
+[26:17:39] CARD-FIRE-NAME1-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5
+[26:17:39] Carta configurada exitosamente: NAME1
+[26:17:39] Configura tu carta 2:

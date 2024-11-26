@@ -20,7 +20,7 @@ public class Weapon {
     }
 
     private void loadConfig() {
-        try (BufferedReader reader = new BufferedReader(new FileReader("config.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/java/org/abno/logic/cards/config.txt"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split("=");
