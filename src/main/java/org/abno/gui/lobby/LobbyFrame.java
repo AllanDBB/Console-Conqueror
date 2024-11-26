@@ -5,17 +5,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static org.abno.socket.Client.send;
+import org.abno.socket.Client; // Importar Client
+import org.abno.gui.game.GameFrame;
 
 public class LobbyFrame extends JFrame {
 
     private JTextField nameField; // Campo para ingresar el nombre
     private JButton readyButton; // Botón para marcar como listo
-    private JCheckBox readyCheckBox; // Checkbox para indicar que está listo
     private JPanel panel; // Panel principal
     private JButton createButton; // Botón para crear
     private JButton joinButton; // Botón para unirse
     private JTextField roomField; // Campo para ingresar el nombre de la sala
+    private GameFrame gameFrame;
 
     public LobbyFrame() {
         setTitle("Lobby");
@@ -88,12 +89,12 @@ public class LobbyFrame extends JFrame {
             }
         });
         readyButton.addActionListener(new ActionListener() {
-            @ Override
+            @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(LobbyFrame.this, "You are ready!", "Status", JOptionPane.INFORMATION_MESSAGE);
                 readyButton.setBackground(new Color(0, 128, 0)); // Verde para indicar listo
                 System.out.println(nameField.getText());
-                send(nameField.getText());
+                Client.send(nameField.getText()); // Llamar al método send de Client
                 readyButton.setText("Ready!"); // Cambiar el texto del botón
 
                 // Ocultar elementos actuales
@@ -123,7 +124,12 @@ public class LobbyFrame extends JFrame {
                 // Lógica para crear una sala
                 JOptionPane.showMessageDialog(LobbyFrame.this, "Sala creada!", "Crear", JOptionPane.INFORMATION_MESSAGE);
                 System.out.println("create");
-                send("create");
+                Client.send("create"); // Llamar al método send de Client
+
+                dispose();
+                gameFrame = new GameFrame();
+                gameFrame.init();
+                Client.setGameFrame(gameFrame); // Pasar la referencia del GameFrame al Client
             }
         });
         gbc.gridx = 0;
@@ -143,8 +149,13 @@ public class LobbyFrame extends JFrame {
                     String roomName = roomField.getText();
                     // Lógica para unirse a la sala
                     System.out.println(roomName);
-                    send(roomName);
+                    Client.send(roomName); // Llamar al método send de Client
                     JOptionPane.showMessageDialog(LobbyFrame.this, "Te has unido a la sala: " + roomName, "Unirse", JOptionPane.INFORMATION_MESSAGE);
+
+                    dispose();
+                    gameFrame = new GameFrame();
+                    gameFrame.init();
+                    Client.setGameFrame(gameFrame); // Pasar la referencia del GameFrame al Client
                 }
             }
         });
