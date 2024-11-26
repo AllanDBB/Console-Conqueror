@@ -1,5 +1,6 @@
 package org.abno.logic.commands;
 
+import org.abno.logic.cards.Weapon;
 import org.abno.logic.player.Player;
 import org.abno.logic.cards.Card;
 
@@ -25,24 +26,17 @@ public class AttackCommand implements Command {
     public void execute(String[] args, OutputStream out, Player attacker) {
         PrintWriter writer = new PrintWriter(out, true);
 
-        // Verifica que los argumentos son suficientes
+
         if (args.length < 3) {
-            writer.println("Error: Uso incorrecto. @Attack <target> <cardName> <weaponIndex>");
+            writer.println("Error: Uso incorrecto. @Attack <target> <cardName> <weapon>");
             return;
         }
 
         String targetName = args[0];
         String cardName = args[1];
-        int weaponIndex;
+        String weaponName = args[2];
 
-        try {
-            weaponIndex = Integer.parseInt(args[2]);
-        } catch (NumberFormatException e) {
-            writer.println("Error: El índice del arma debe ser un número.");
-            return;
-        }
 
-        // Busca al jugador objetivo
         Player target = players.get(targetName);
 
         if (target == null) {
@@ -50,28 +44,20 @@ public class AttackCommand implements Command {
             return;
         }
 
-        // Busca la carta del atacante
-        Card warrior = null;
-        for (int i = 1; i <= 4; i++) {
-            Card card = attacker.getCard(i);
-            if (card != null && card.getName().equalsIgnoreCase(cardName)) {
-                warrior = card;
-                break;
-            }
-        }
 
-        if (warrior == null) {
+        Card card = attacker.getSpecificCard(cardName);
+        if (card == null){
             writer.println("Error: Carta no encontrada en tu mazo.");
             return;
         }
 
-        // Realiza el ataque
-        if (warrior.isUsed(weaponIndex)) {
+        Weapon weapon = card.getSpecificWeapon(weaponName);
+        if (weapon == null) {
             writer.println("Error: El arma ya ha sido usada.");
             return;
         }
 
-        attacker.attack(target, warrior, weaponIndex);
-        writer.println("Has atacado a " + targetName + " con " + cardName + " usando el arma " + weaponIndex + ".");
+        attacker.attack(target, card, weaponName);
+        writer.println("Has atacado a " + targetName + " con " + cardName + " usando el arma " + weaponName + ".");
     }
 }
