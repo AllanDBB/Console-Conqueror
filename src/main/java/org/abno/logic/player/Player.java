@@ -32,18 +32,9 @@ public class Player {
 
     public void attack(Player enemy, Card warrior, String weapon){
         if (warrior.getSpecificWeapon(weapon).isUsed()){
-    public String getUsername() {
-        return username;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void attack(Player enemy, Card warrior, int weapon){
-        if (warrior.isUsed(weapon)){
             return;
         }
+
 
         int damage = warrior.getSpecificWeapon(weapon).getArray()[warrior.getType().ordinal()];
 
@@ -57,9 +48,6 @@ public class Player {
         warrior.getSpecificWeapon(weapon).setUsed(true);
     }
 
-    public String getName() {
-        return name;
-    }
 
     public Card[] getCards() {
         return cards;
@@ -72,5 +60,13 @@ public class Player {
             }
         }
         return null;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }
