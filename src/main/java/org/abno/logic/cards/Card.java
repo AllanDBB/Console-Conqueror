@@ -1,6 +1,5 @@
-package org.abno.logic;
+package org.abno.logic.cards;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class Card {

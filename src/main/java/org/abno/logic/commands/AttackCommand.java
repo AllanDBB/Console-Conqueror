@@ -1,7 +1,7 @@
 package org.abno.logic.commands;
 
-import org.abno.logic.Player;
-import org.abno.logic.Card;
+import org.abno.logic.player.Player;
+import org.abno.logic.cards.Card;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;

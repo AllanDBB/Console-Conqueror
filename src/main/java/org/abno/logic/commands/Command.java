@@ -1,9 +1,8 @@
 package org.abno.logic.commands;
 
-import org.abno.logic.Player;
+import org.abno.logic.player.Player;
 
 import java.io.OutputStream;
-import java.io.PrintWriter;
 
 public interface Command {
     public String getCommandName();

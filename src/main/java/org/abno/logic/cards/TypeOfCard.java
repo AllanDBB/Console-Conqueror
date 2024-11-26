@@ -1,4 +1,4 @@
-package org.abno.logic;
+package org.abno.logic.cards;
 
 public enum TypeOfCard {
     FIRE,

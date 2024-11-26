@@ -1,4 +1,6 @@
-package org.abno.logic;
+package org.abno.logic.player;
+
+import org.abno.logic.cards.Card;
 
 public class Player {
     private String name;
