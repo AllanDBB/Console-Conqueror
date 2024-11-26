@@ -58,7 +58,6 @@ public class InitFrame extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lobbyFrame.init();
-                System.out.println("¡El juego ha comenzado!");
                 dispose();
             }
         });

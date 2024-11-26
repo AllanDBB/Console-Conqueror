@@ -21,8 +21,8 @@ public class GameRoom implements Runnable {
     private BufferedReader hostIn;
     private final CommandManager commandManager;
 
-    private int currentTurnIndex = 0; // Índice del jugador actual
-    private boolean isTurnBased = false; // Indica si el sistema de turnos está activo
+    private int currentTurnIndex = 0;
+    private boolean isTurnBased = false;
 
     public GameRoom(Socket hostSocket, String hostUsername, String hostUserId) {
         this.hostSocket = hostSocket;

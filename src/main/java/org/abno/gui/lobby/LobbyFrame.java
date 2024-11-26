@@ -5,11 +5,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import static org.abno.socket.Client.send;
+
 public class LobbyFrame extends JFrame {
 
     private JTextField nameField; // Campo para ingresar el nombre
     private JButton readyButton; // Botón para marcar como listo
     private JCheckBox readyCheckBox; // Checkbox para indicar que está listo
+    private JPanel panel; // Panel principal
+    private JButton createButton; // Botón para crear
+    private JButton joinButton; // Botón para unirse
+    private JTextField roomField; // Campo para ingresar el nombre de la sala
 
     public LobbyFrame() {
         setTitle("Lobby");
@@ -18,7 +24,7 @@ public class LobbyFrame extends JFrame {
         setLocationRelativeTo(null); // Centrar la ventana
 
         // Crear un panel con fondo blanco
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         panel.setLayout(new GridBagLayout()); // Usar GridBagLayout para organizar los componentes
         panel.setBackground(Color.WHITE); // Fondo blanco
         add(panel); // Agregar el panel al JFrame
@@ -82,19 +88,68 @@ public class LobbyFrame extends JFrame {
             }
         });
         readyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed (ActionEvent e) {
-                if (readyCheckBox.isSelected()) {
-                    JOptionPane.showMessageDialog(LobbyFrame.this, "You are ready!", "Status", JOptionPane.INFORMATION_MESSAGE);
-                    readyButton.setBackground(new Color(0, 128, 0)); // Verde para indicar listo
-                    readyButton.setText("Ready!"); // Cambiar el texto del botón
-                } else {
-                    JOptionPane.showMessageDialog(LobbyFrame.this, "You need to be marked as ready.", "Status", JOptionPane.WARNING_MESSAGE);
-                }
+            @ Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(LobbyFrame.this, "You are ready!", "Status", JOptionPane.INFORMATION_MESSAGE);
+                readyButton.setBackground(new Color(0, 128, 0)); // Verde para indicar listo
+                System.out.println(nameField.getText());
+                send(nameField.getText());
+                readyButton.setText("Ready!"); // Cambiar el texto del botón
+
+                // Ocultar elementos actuales
+                nameLabel.setVisible(false);
+                nameField.setVisible(false);
+                readyButton.setVisible(false);
+
+                // Mostrar botones de crear y unirse
+                showCreateJoinButtons();
             }
         });
         gbc.gridx = 1;
         panel.add(readyButton, gbc);
+    }
+
+    private void showCreateJoinButtons() {
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(15, 15, 15, 15);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Botón para crear
+        createButton = new JButton("Crear");
+        createButton.setFont(new Font("Arial", Font.BOLD, 16));
+        createButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Lógica para crear una sala
+                JOptionPane.showMessageDialog(LobbyFrame.this, "Sala creada!", "Crear", JOptionPane.INFORMATION_MESSAGE);
+                System.out.println("create");
+                send("create");
+            }
+        });
+        gbc.gridx = 0;
+        gbc.gridy = 0; // Fila 0
+        panel.add(createButton, gbc);
+
+        // Botón para unirse
+        joinButton = new JButton("Unirse");
+        joinButton.setFont(new Font("Arial", Font.BOLD, 16));
+        joinButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Pedir el nombre de la sala
+                roomField = new JTextField(20);
+                int option = JOptionPane.showConfirmDialog(LobbyFrame.this, roomField, "Ingrese el nombre de la sala", JOptionPane.OK_CANCEL_OPTION);
+                if (option == JOptionPane.OK_OPTION) {
+                    String roomName = roomField.getText();
+                    // Lógica para unirse a la sala
+                    System.out.println(roomName);
+                    send(roomName);
+                    JOptionPane.showMessageDialog(LobbyFrame.this, "Te has unido a la sala: " + roomName, "Unirse", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        gbc.gridx = 1; // Columna 1
+        panel.add(joinButton, gbc);
     }
 
     public static void init() {
