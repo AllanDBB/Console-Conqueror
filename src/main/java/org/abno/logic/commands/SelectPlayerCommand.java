@@ -5,7 +5,7 @@ import org.abno.logic.player.Player;
 import java.io.OutputStream;
 
 public class SelectPlayerCommand implements Command{
-    public static final String COMMAND_NAME = "SelectPlayer";
+    public static final String COMMAND_NAME = "/SELECTPLAYER";
 
 
     @Override

@@ -4,17 +4,21 @@ import org.abno.logic.cards.Card;
 import org.abno.logic.cards.Weapon;
 
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Player {
     private Socket socket;
     private String username;
     private String userId;
-    private Card[] cards;
+    private List<Card> cards = new ArrayList<>();
+    private int[] stats= new int[6];
 
     /*
     int wins;
     int loses;
-    int attacks;
+    int attacks;            este es el orden del array
     int success;
     int failed;
     int gaveup;  no se si esto es necesario*/
@@ -24,6 +28,10 @@ public class Player {
         this.socket = socket;
         this.username = username;
         this.userId = userId;
+    }
+
+    public int[] getStats() {
+        return stats;
     }
 
     public Socket getSocket() {
@@ -49,13 +57,14 @@ public class Player {
     }
 
 
-    public Card[] getCards() {
+    public List<Card> getCards() {
         return cards;
     }
 
     public Card getSpecificCard(String name){
         for (Card c: this.cards){
-            if (c.getName() == name){
+            System.out.println(c.getName());
+            if (Objects.equals(c.getName(), name)){
                 return c;
             }
         }
@@ -68,5 +77,10 @@ public class Player {
 
     public String getUserId() {
         return userId;
+    }
+
+
+    public void setCards(List<Card> playerCards) {
+        this.cards = playerCards;
     }
 }

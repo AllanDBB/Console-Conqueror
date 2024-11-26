@@ -1,6 +1,10 @@
 package org.abno.logic.commands;
 
+import org.abno.logic.player.Player;
+import org.abno.socket.GameRoom;
+
 import java.util.HashMap;
+import java.util.Map;
 
 public class CommandManager {
     //singleton
@@ -8,6 +12,8 @@ public class CommandManager {
     //hash de Commands: nombre, class que extiende Command
     private static final HashMap<String, Class<? extends Command>> COMMANDS =
             new HashMap<String, Class<? extends Command>>();
+    private static final HashMap<String, Command> commandCache = new HashMap<>();
+    private static GameRoom gameRoom;
 
     private CommandManager() {
         registCommand(AttackCommand.COMMAND_NAME, AttackCommand.class);
@@ -26,30 +32,29 @@ public class CommandManager {
         return commandManager;
     }
 
+    public static void setGameRoom(GameRoom gameRoom) {
+        CommandManager.gameRoom = gameRoom;
+    }
+
     // obtiene un Command por nombre
     // obtien una instancia con el nombre de la clase
-    public Command getCommand(String commandName) {
-        if (COMMANDS.containsKey(commandName.toUpperCase())) {
-            try {
-                //retorna nueva isntancia de comando solicitado
-                return COMMANDS.get(commandName.toUpperCase()).newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-                //retorna comando de error en la exception
-                //return new ErrorCommand();
-                return null;
+    public Command getCommand(String commandName, Map<String, Player> players) {
+        Command command = commandCache.get(commandName.toUpperCase()); // Buscar en caché
+        if (command == null) {
+            command = CommandFactory.createCommand(commandName, players, gameRoom); // Crear el comando si no está en caché
+            if (command != null) {
+                commandCache.put(commandName.toUpperCase(), command); // Guardar el comando en caché
             }
         }
-        else {
-            // retorno de error comando no encontrado
-            //return new NotFoundCommand();
-            return null;
-        }
+        return command; // Retorna el comando encontrado o null si no se encuentra
     }
+
 
     // para registrar un comando, nombre y clase de tipo ICommand
     public void registCommand(String commandName, Class<? extends Command> command) {
         COMMANDS.put(commandName.toUpperCase(), command);
     }
+
+
 }
 

@@ -1,5 +1,6 @@
 package org.abno.logic.cards;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class Card {
@@ -14,7 +15,7 @@ public class Card {
     private int life;
 
 
-    Card(TypeOfCard type, String name, String image, Weapon[] weapons){
+    public Card(TypeOfCard type, String name, String image, Weapon[] weapons){
         this.type = type;
         this.name = name;
         this.image = image;
@@ -48,7 +49,7 @@ public class Card {
 
     public Weapon getSpecificWeapon(String name){
         for (Weapon w : this.weapons){
-            if (w.getName() == name){
+            if (Objects.equals(w.getName(), name)){
                 return w;
             }
         }

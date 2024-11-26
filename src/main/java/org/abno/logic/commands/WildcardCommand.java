@@ -5,7 +5,7 @@ import org.abno.logic.player.Player;
 import java.io.OutputStream;
 
 public class WildcardCommand implements Command{
-    public static final String COMMAND_NAME = "Wildcard";
+    public static final String COMMAND_NAME = "/WILDCARD";
 
 
     @Override

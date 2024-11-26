@@ -1,5 +1,8 @@
 package org.abno.socket;
 
+import org.abno.logic.cards.Card;
+import org.abno.logic.cards.TypeOfCard;
+import org.abno.logic.cards.Weapon;
 import org.abno.logic.commands.Command;
 import org.abno.logic.commands.CommandManager;
 import org.abno.logic.player.Player;
@@ -9,9 +12,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class GameRoom implements Runnable {
     private final String roomId;
@@ -24,10 +25,14 @@ public class GameRoom implements Runnable {
     private int currentTurnIndex = 0;
     private boolean isTurnBased = false;
 
+    private boolean drawRequested = false;
+
+
     public GameRoom(Socket hostSocket, String hostUsername, String hostUserId) {
         this.hostSocket = hostSocket;
         this.roomId = generateRoomId();
         this.commandManager = CommandManager.getIntance();
+        CommandManager.setGameRoom(this);
         players.add(new Player(hostSocket, hostUsername, hostUserId));
     }
 
@@ -46,7 +51,7 @@ public class GameRoom implements Runnable {
                 // Verificar si el mensaje es un comando o un mensaje de chat
                 if (message.startsWith("/")) {
                     // Procesar como comando
-                    handleMessage("COMMAND:" + message, hostSocket, players.get(0).getUsername());
+                    handleCommand(message, hostSocket, players.get(0).getUsername());
                 } else {
                     // Procesar como mensaje de chat
                     handleMessage("CHAT:" + message, hostSocket, players.get(0).getUsername());
@@ -60,30 +65,25 @@ public class GameRoom implements Runnable {
     }
 
     void handleMessage(String message, Socket senderSocket, String senderUsername) throws IOException {
-        Player senderPlayer = findPlayerByUser(senderUsername);
-
-        if (isTurnBased && senderPlayer != players.get(currentTurnIndex)) {
-            PrintWriter out = new PrintWriter(senderSocket.getOutputStream(), true);
-            out.println("It's not your turn!");
-            return;
-        }
-
         if (message.startsWith("CHAT:")) {
             String chatMessage = message.substring(5).trim();
             broadcast(senderUsername + ": " + chatMessage);
-        } else if (message.startsWith("COMMAND:")) {
-            String command = message.substring(8).trim();
-            processCommand(command, senderSocket, senderUsername);
-        }
-
-        if (isTurnBased) {
-            advanceTurn();
         }
     }
 
-    private void processCommand(String command, Socket senderSocket, String senderUsername) throws IOException {
+    private void handleCommand(String command, Socket senderSocket, String senderUsername) throws IOException {
+        Player senderPlayer = findPlayerByUser(senderUsername);
+
+        // Validar si es el turno del jugador para usar comandos
+        if (isTurnBased && senderPlayer != players.get(currentTurnIndex)) {
+            PrintWriter out = new PrintWriter(senderSocket.getOutputStream(), true);
+            out.println("It's not your turn! You can only chat.");
+            return;
+        }
+
         String[] commandParts = command.split(" ");
         String commandName = commandParts[0];
+
 
         switch (commandName) {
             case "/exit":
@@ -98,8 +98,12 @@ public class GameRoom implements Runnable {
                 }
                 return;
             case "/start":
-                if (findPlayerByUser(senderUsername) == players.get(0)){
-                    enableTurnBasedSystem();}
+                if (findPlayerByUser(senderUsername) == players.get(0)) {
+                    for (Player player : players) {
+                        configureCards(player);
+                    }
+                    enableTurnBasedSystem();
+                }
                 return;
             case "/endTurn":
                 if (isTurnBased && senderUsername.equals(players.get(currentTurnIndex).getUsername())) {
@@ -109,9 +113,11 @@ public class GameRoom implements Runnable {
                     out.println("You can't end the turn because it's not your turn!");
                 }
                 return;
+
         }
 
-        Command c = commandManager.getCommand(commandName);
+        Command c = commandManager.getCommand(commandName, getPlayersMap());
+
         if (c != null) {
             Player p = findPlayerByUser(senderUsername);
             if (p != null) {
@@ -174,6 +180,7 @@ public class GameRoom implements Runnable {
     public void enableTurnBasedSystem() {
         if (players.size() > 1) {
             isTurnBased = true;
+            currentTurnIndex = 0; // Reinicia al primer jugador
             notifyCurrentPlayerTurn();
         } else {
             broadcast("Not enough players to enable turn-based system.");
@@ -199,4 +206,97 @@ public class GameRoom implements Runnable {
         currentTurnIndex = (currentTurnIndex + 1) % players.size();
         notifyCurrentPlayerTurn();
     }
+
+    private Map<String, Player> getPlayersMap() {
+        Map<String, Player> playersMap = new HashMap<>();
+        for (Player player : players) {
+            playersMap.put(player.getUsername(), player);
+        }
+
+        return playersMap;
+    }
+
+    private void configureCards(Player player) throws IOException {
+        // Notificar al jugador que debe configurar sus cartas
+        PrintWriter playerOut = new PrintWriter(player.getSocket().getOutputStream(), true);
+        playerOut.println("Es tu turno para configurar tus cartas.");
+
+        // Crear un BufferedReader para leer entradas del jugador
+        InputStreamReader playerIn = new InputStreamReader(player.getSocket().getInputStream());
+        BufferedReader reader = new BufferedReader(playerIn);
+
+        // Recorremos el ciclo para que se configuren 4 cartas
+        for (int i = 1; i <= 4; i++) {
+            playerOut.println("Configura tu carta " + i + ":");
+
+            // Leer el comando del jugador
+            String command = reader.readLine();
+
+            if (command == null || command.trim().isEmpty()) {
+                playerOut.println("Entrada vacía. Intenta de nuevo.");
+                i--; // Si la entrada es vacía, no avanzamos a la siguiente carta
+                continue;
+            }
+
+            // Split the command into parts
+            String[] parts = command.split("-");
+
+            // Validar el formato del comando
+            if (parts.length != 9) {
+                playerOut.println("Formato de comando inválido. El formato esperado es: CARD-TYPE-NAME-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5");
+                i--; // Si el formato no es correcto, no avanzamos a la siguiente carta
+                continue;
+            }
+
+            // Parse the command parts
+            String cardTypeString = parts[1]; // Tipo de carta (e.g., FIRE)
+            String cardName = parts[2]; // Nombre de la carta
+            String image = parts[3]; // Nombre de la imagen
+            Weapon[] weapons = new Weapon[5]; // Array de armas
+
+            // Crear las armas a partir de los partes del comando
+            for (int j = 0; j < 5; j++) {
+                weapons[j] = new Weapon(parts[4 + j]); // ARM1, ARM2, ..., ARM5
+            }
+
+            // Convertir el string a un tipo de carta (TypeOfCard enum)
+            TypeOfCard selectedType;
+            try {
+                selectedType = TypeOfCard.valueOf(cardTypeString.toUpperCase()); // Convierte el tipo de carta
+            } catch (IllegalArgumentException e) {
+                playerOut.println("Tipo de carta inválido: " + cardTypeString);
+                i--; // Si el tipo de carta no es válido, no avanzamos a la siguiente carta
+                continue;
+            }
+
+            // Crear la carta y añadirla a las cartas del jugador
+            Card newCard = new Card(selectedType, cardName, image, weapons);
+
+            // Obtener la lista de cartas del jugador y añadir la nueva carta
+            List<Card> playerCards = player.getCards();
+            playerCards.add(newCard); // Añadir la nueva carta a la lista de cartas
+
+
+            // Mensaje de confirmación
+            playerOut.println("Carta configurada exitosamente: " + newCard.getName());
+        }
+    }
+
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void endGameInDraw() {
+        // Lógica para finalizar el juego por empate
+        broadcast("The game has ended in draw!");
+        // Realiza cualquier limpieza necesaria o finalización del juego
+    }
+
+    public void endGameSurrender(){
+        broadcast("The game has ended because everyone else surrendered!");
+        broadcast(players.getFirst().getUsername()+ " won!");
+    }
+
+
 }

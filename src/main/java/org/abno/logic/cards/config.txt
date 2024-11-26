@@ -1,0 +1,2 @@
+minValue=20
+maxValue=100
