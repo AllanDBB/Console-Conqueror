@@ -32,3 +32,19 @@
 [26:17:39] CARD-FIRE-NAME1-IMAGE-ARM1-ARM2-ARM3-ARM4-ARM5
 [26:17:39] Carta configurada exitosamente: NAME1
 [26:17:39] Configura tu carta 2:
+[26:17:53] asd
+[26:17:53] create
+[26:18:03] ASD
+[26:18:03] create
+[26:18:03] ASD
+[26:18:03] ASD: ASD
+[26:18:03] /say pepe
+[26:18:03] ASD says: pepe
+[26:18:05] ASD
+[26:18:05] create
+[26:18:05] ASD
+[26:18:05] ASD: ASD
+[26:18:05] /says pepe
+[26:18:05] Unknown command: /says
+[26:18:05] /say PEPE
+[26:18:05] ASD says: PEPE
